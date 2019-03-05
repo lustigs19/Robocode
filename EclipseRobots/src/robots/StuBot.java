@@ -1,24 +1,30 @@
+package robots;
 import robocode.HitWallEvent;
 import robocode.Robot;
 import robocode.ScannedRobotEvent;
 import robocode.util.Utils;
 import robocode.WinEvent;
+import robocode.Rules;
 
 import java.awt.Color;
 
+import assets.*;
+
 public class StuBot extends Robot {
 	
-	static final int SPIN_COUNT_THRESHOLD = 3;
-	static final double ROBOT_DEG_PER_TURN = 10.0;
-	static final double GUN_DEG_PER_TURN = 20.0;
 	static final int QUADRANT_ERROR = 0;
 	static final double SCAN_FACTOR = 1.9;
+	
+	static final int TIME_THRESHOLD = 25;
+	
+	static final double LOCKED_THRESHOLD = 12.0;
+	double lastRadarTurn = 180.0;
 	
 	public void run() {
 		setColors(Color.BLACK, Color.GRAY, Color.GREEN, Color.GREEN, Color.GREEN);
 		
+		setAdjustRadarForGunTurn(false);
 		setAdjustGunForRobotTurn(true);
-		setAdjustRadarForGunTurn(true);
 		
 		while (true) {
 			int quadrant;
@@ -68,11 +74,32 @@ public class StuBot extends Robot {
 					turnRadarLeft(Double.POSITIVE_INFINITY);
 				}
 			}
+			
+			lastRadarTurn = 180.0;
 		}
 	}
 	
 	public void onScannedRobot(ScannedRobotEvent e) {
-		turnRadarRight(SCAN_FACTOR * Utils.normalRelativeAngleDegrees(getHeading() + e.getBearing() - getRadarHeading()));
+		out.println("Locked? " + isLockedOn());
+		double gunAngle = 0;
+		
+		if (isLockedOn()) {
+			e.getVelocity();
+			Rules.getBulletSpeed(1);
+			turnGunRight(gunAngle);
+			e.getHeading();
+			
+			Line l;
+			
+			try {
+				l = new Line()
+			} catch (Exception e) {
+				
+			}
+		}
+		
+		lastRadarTurn = SCAN_FACTOR * Utils.normalRelativeAngleDegrees(getHeading() + e.getBearing() - getRadarHeading() - gunAngle);
+		turnRadarRight(lastRadarTurn);
 	}
 	
 	public void onHitWall(HitWallEvent e) {
@@ -86,5 +113,9 @@ public class StuBot extends Robot {
 			turnLeft(45);
 			turnRadarRight(180);
 		}
+	}
+	
+	public boolean isLockedOn() {
+		return Math.abs(lastRadarTurn) < LOCKED_THRESHOLD;
 	}
 }
