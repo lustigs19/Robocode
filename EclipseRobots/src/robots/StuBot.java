@@ -18,7 +18,7 @@ public class StuBot extends AdvancedRobot {
 	
 	static final double ROBOT_WIDTHS = 3.0;
 	
-	static final double SLOW_TURN_ANGLE = 45.0;
+	static final double SLOW_TURN_ANGLE = 25.0;
 	
 	double lastRadarTurn = 180.0;
 	
@@ -114,6 +114,10 @@ public class StuBot extends AdvancedRobot {
 			turnRadarLeft(180);
 			turnLeft(45);
 			turnRadarRight(180);
+			turnLeft(45);
+			turnRadarRight(180);
+			turnRight(45);
+			turnRadarLeft(180);
 		}
 	}
 	
