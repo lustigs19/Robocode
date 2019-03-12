@@ -29,53 +29,7 @@ public class StuBot extends AdvancedRobot {
 		setAdjustGunForRobotTurn(true);
 		
 		while (true) {
-			int quadrant;
-			if (getX() >= getBattleFieldWidth() / 2.0 && getY() >= getBattleFieldHeight() / 2.0) {
-				quadrant = 1;
-			} else if (getX() <= getBattleFieldWidth() / 2.0 && getY() >= getBattleFieldHeight() / 2.0) {
-				quadrant = 2;
-			} else if (getX() <= getBattleFieldWidth() / 2.0 && getY() <= getBattleFieldHeight() / 2.0) {
-				quadrant = 3;
-			} else if (getX() >= getBattleFieldWidth() / 2.0 && getY() <= getBattleFieldHeight() / 2.0) {
-				quadrant = 4;
-			} else {
-				quadrant = QUADRANT_ERROR;
-			}
-			
-			Double angle;
-			
-			switch (quadrant) {
-			case 1:
-				angle = 45.0;
-				break;
-			case 2:
-				angle = 315.0;
-				break;
-			case 3:
-				angle = 225.0;
-				break;
-			case 4:
-				angle = 135.0;
-				break;
-			default:
-			case QUADRANT_ERROR:
-				// do nothing
-				angle = null;
-				break;
-			}
-			
-			out.println("quadrant: " + quadrant + "\nheading: " + getRadarHeading() + "\nangle: " + angle.toString());
-			
-			
-			if (angle != null) {
-				if (getRadarHeading() >= angle && getRadarHeading() < (angle + 180.0) % 360.0) {
-					out.println("Turning right");
-					turnRadarRight(360);
-				} else {
-					out.println("Turning left");
-					turnRadarLeft(360);
-				}
-			}
+			turnQuadrant();
 			lastRadarTurn = 180.0;
 		}
 	}
@@ -85,18 +39,26 @@ public class StuBot extends AdvancedRobot {
 		
 		if (isLockedOn()) {
 			
+			
+			
 			if (Math.abs(e.getBearing()) > SLOW_TURN_ANGLE) {
 				setAhead(0);
 			} else {
 				setAhead(Double.POSITIVE_INFINITY);
 			}
 				
-			setTurnRight(e.getBearing());
+			setTurnRight(e.getBearing());			
+			out.println("gun heading: " + getGunHeading() + " enemy bearing: " + e.getBearing());
 			
 			if (e.getDistance() < ROBOT_WIDTHS * getWidth()) {
-//				out.println("firing, not touching");
-				setTurnGunRight(e.getBearing());
-				setFire(Rules.MAX_BULLET_POWER);
+				double bulletPower = Math.min(Rules.MAX_BULLET_POWER, getEnergy());
+				
+				setTurnGunRightRadians(Utils.normalRelativeAngle(getHeadingRadians() + e.getBearing() - 
+					    getGunHeadingRadians() + Math.asin(e.getVelocity() * Math.sin(-e.getBearing()) / Rules.getBulletSpeed(bulletPower))));
+				
+				setFire(bulletPower);
+			} else {
+				setTurnGunRight(Utils.normalRelativeAngleDegrees(getHeading() - getGunHeading() + e.getBearing()));
 			}
 		}
 		
@@ -129,5 +91,55 @@ public class StuBot extends AdvancedRobot {
 	
 	public boolean isLockedOn() {
 		return Math.abs(lastRadarTurn) < LOCKED_THRESHOLD;
+	}
+	
+	public void turnQuadrant() {
+		int quadrant;
+		if (getX() >= getBattleFieldWidth() / 2.0 && getY() >= getBattleFieldHeight() / 2.0) {
+			quadrant = 1;
+		} else if (getX() <= getBattleFieldWidth() / 2.0 && getY() >= getBattleFieldHeight() / 2.0) {
+			quadrant = 2;
+		} else if (getX() <= getBattleFieldWidth() / 2.0 && getY() <= getBattleFieldHeight() / 2.0) {
+			quadrant = 3;
+		} else if (getX() >= getBattleFieldWidth() / 2.0 && getY() <= getBattleFieldHeight() / 2.0) {
+			quadrant = 4;
+		} else {
+			quadrant = QUADRANT_ERROR;
+		}
+		
+		Double angle;
+		
+		switch (quadrant) {
+		case 1:
+			angle = 45.0;
+			break;
+		case 2:
+			angle = 315.0;
+			break;
+		case 3:
+			angle = 225.0;
+			break;
+		case 4:
+			angle = 135.0;
+			break;
+		default:
+		case QUADRANT_ERROR:
+			// do nothing
+			angle = null;
+			break;
+		}
+		
+		out.println("quadrant: " + quadrant + "\nheading: " + getRadarHeading() + "\nangle: " + angle.toString());
+		
+		
+		if (angle != null) {
+			if (getRadarHeading() >= angle && getRadarHeading() < (angle + 180.0) % 360.0) {
+				out.println("Turning right");
+				turnRadarRight(360);
+			} else {
+				out.println("Turning left");
+				turnRadarLeft(360);
+			}
+		}
 	}
 }
