@@ -11,7 +11,7 @@ import java.awt.Color;
 
 public class RandomBot extends Robot {
 	
-	static final double RAND_DIST = 400.0;
+	static final double MAX_DIST = 400.0;
 	
 	public void run() {
 		setColors(Color.BLACK, Color.GRAY, Color.GREEN, Color.GREEN, Color.GREEN);
@@ -21,14 +21,11 @@ public class RandomBot extends Robot {
 		
 		while (true) {
 			turnGunRight(360.0);
-			switch ((int) (Math.random() * 3.0)) {
+			switch ((int) (Math.random() * 2.0)) {
 			case 0:
-				ahead(Math.random() * RAND_DIST);
+				ahead(Math.random() * (MAX_DIST * 2.0) - MAX_DIST);
 				break;
 			case 1:
-				back(Math.random() * RAND_DIST);
-				break;
-			case 2:
 				turnRight((Math.random() - 0.5) * 360.0);
 				break;
 			}

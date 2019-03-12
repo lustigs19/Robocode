@@ -25,8 +25,8 @@ public class StuBot extends AdvancedRobot {
 	public void run() {
 		setColors(Color.BLACK, Color.GRAY, Color.GREEN, Color.GREEN, Color.GREEN);
 		
-		setAdjustRadarForGunTurn(false);
-		setAdjustGunForRobotTurn(false);
+		setAdjustRadarForGunTurn(true);
+		setAdjustGunForRobotTurn(true);
 		
 		while (true) {
 			int quadrant;
@@ -95,6 +95,7 @@ public class StuBot extends AdvancedRobot {
 			
 			if (e.getDistance() < ROBOT_WIDTHS * getWidth()) {
 //				out.println("firing, not touching");
+				setTurnGunRight(e.getBearing());
 				setFire(Rules.MAX_BULLET_POWER);
 			}
 		}
